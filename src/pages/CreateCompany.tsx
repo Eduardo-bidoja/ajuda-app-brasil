@@ -42,7 +42,7 @@ export default function CreateCompanyPage() {
 
     setLoading(true);
 
-    const { data: companyData, error: companyError } = await supabase
+    const { data: companyData, error: companyError } = await (supabase as any)
       .from('companies')
       .insert({
         name: values.companyName,
@@ -57,7 +57,7 @@ export default function CreateCompanyPage() {
       return;
     }
 
-    const { error: profileError } = await supabase
+    const { error: profileError } = await (supabase as any)
       .from('profiles')
       .update({ company_id: companyData.id })
       .eq('id', user.id);

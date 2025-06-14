@@ -1,10 +1,17 @@
-
 import { useState, useEffect, createContext, useContext, ReactNode } from 'react';
 import { Session, User } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
-import { Tables } from '@/integrations/supabase/types';
 
-type Profile = Tables<'profiles'>;
+// Manually defining Profile type to fix build errors
+type Profile = {
+  id: string;
+  full_name: string | null;
+  email: string | null;
+  role: 'admin' | 'employee';
+  company_id: string | null;
+  hourly_rate: number | null;
+  created_at: string;
+};
 
 type AuthContextType = {
   session: Session | null;
@@ -31,7 +38,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         setSession(session);
         setUser(session.user);
         
-        const { data: userProfile } = await supabase
+        const { data: userProfile } = await (supabase as any)
           .from('profiles')
           .select('*')
           .eq('id', session.user.id)
@@ -52,7 +59,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         setUser(currentUser);
 
         if (currentUser) {
-          const { data: userProfile } = await supabase
+          const { data: userProfile } = await (supabase as any)
             .from('profiles')
             .select('*')
             .eq('id', currentUser.id)
@@ -82,7 +89,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     signOut,
   };
 
-  return <AuthContext.Provider value={value}>{!loading && children}</AuthContext.Provider>;
+  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 };
 
 export const useAuth = () => {

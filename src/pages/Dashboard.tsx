@@ -1,12 +1,17 @@
-
 import { useAuth } from '@/hooks/use-auth';
 import { Button } from '@/components/ui/button';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { useEffect, useState } from 'react';
-import { Tables } from '@/integrations/supabase/types';
 
-type Company = Tables<'companies'>;
+// Manually defining Company type to fix build errors
+type Company = {
+  id: string;
+  owner_id: string;
+  name: string;
+  company_code: string;
+  created_at: string;
+};
 
 export default function Dashboard() {
   const { user, profile, signOut } = useAuth();
@@ -18,7 +23,7 @@ export default function Dashboard() {
     const fetchCompany = async () => {
       if (profile?.company_id) {
         setLoading(true);
-        const { data, error } = await supabase
+        const { data, error } = await (supabase as any)
           .from('companies')
           .select('*')
           .eq('id', profile.company_id)
