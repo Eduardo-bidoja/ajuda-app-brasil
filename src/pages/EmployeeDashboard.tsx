@@ -17,8 +17,9 @@ type TimeEntry = {
   clock_out: string | null;
 };
 
-const fetchTimeEntries = async (userId: string) => {
-    const { data, error } = await supabase
+const fetchTimeEntries = async (userId: string): Promise<TimeEntry[]> => {
+    // Cast to 'any' to bypass TS error due to outdated Supabase types
+    const { data, error } = await (supabase as any)
         .from('time_entries')
         .select('id, clock_in, clock_out')
         .eq('user_id', userId)
@@ -26,7 +27,7 @@ const fetchTimeEntries = async (userId: string) => {
         .limit(10);
     
     if (error) throw new Error(error.message);
-    return data;
+    return data || [];
 };
 
 export default function EmployeeDashboard() {

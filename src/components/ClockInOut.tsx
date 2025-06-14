@@ -17,10 +17,14 @@ type TimeEntry = {
   company_id: string;
   clock_in: string;
   clock_out: string | null;
+  clock_in_latitude: number | null;
+  clock_in_longitude: number | null;
+  clock_out_latitude: number | null;
+  clock_out_longitude: number | null;
 };
 
-const fetchLatestTimeEntry = async (userId: string) => {
-  const { data, error } = await supabase
+const fetchLatestTimeEntry = async (userId: string): Promise<TimeEntry | null> => {
+  const { data, error } = await (supabase as any)
     .from('time_entries')
     .select('*')
     .eq('user_id', userId)
@@ -46,8 +50,8 @@ export default function ClockInOut() {
   });
 
   const clockInMutation = useMutation({
-    mutationFn: async (coords: GeolocationCoordinates | null) => {
-      const { data, error } = await supabase.from('time_entries').insert({
+    mutationFn: async (coords: GeolocationCoordinates | null): Promise<TimeEntry> => {
+      const { data, error } = await (supabase as any).from('time_entries').insert({
         user_id: user!.id,
         company_id: profile!.company_id!,
         clock_in: new Date().toISOString(),
@@ -69,8 +73,8 @@ export default function ClockInOut() {
   });
 
   const clockOutMutation = useMutation({
-    mutationFn: async ({ id, coords }: { id: string, coords: GeolocationCoordinates | null }) => {
-      const { data, error } = await supabase
+    mutationFn: async ({ id, coords }: { id: string, coords: GeolocationCoordinates | null }): Promise<TimeEntry> => {
+      const { data, error } = await (supabase as any)
         .from('time_entries')
         .update({
           clock_out: new Date().toISOString(),
@@ -104,9 +108,12 @@ export default function ClockInOut() {
         await clockOutMutation.mutateAsync({ id: latestTimeEntry.id, coords });
       }
     } catch (error: any) {
-      toast.error('Erro de Geolocalização', {
-        description: error.message || 'Não foi possível obter sua localização. Verifique as permissões.',
-      });
+      // Don't show toast for geolocation error if it's already displayed by the icon
+      if (!geoError) {
+        toast.error('Erro de Geolocalização', {
+            description: error.message || 'Não foi possível obter sua localização. Verifique as permissões.',
+        });
+      }
     } finally {
       setIsSubmitting(false);
     }
@@ -130,7 +137,7 @@ export default function ClockInOut() {
         </div>
         <div className="flex items-center gap-4">
           {loading && <Loader2 className="animate-spin" />}
-          {geoError && <LocateOff className="text-destructive" title={geoError.message} />}
+          {geoError && <LocateOff className="text-destructive" />}
 
           {!clockedIn && (
             <Button size="lg" onClick={() => handleAction('clock_in')} disabled={loading}>
