@@ -26,7 +26,11 @@ const Index = () => {
           navigate('/dashboard');
         }
       } else if (profile.role === 'employee') {
-        navigate('/employee-dashboard');
+        if (!profile.company_id) {
+          navigate('/join-company');
+        } else {
+          navigate('/employee-dashboard');
+        }
       }
     }
     // If there's a user but no profile yet, the hook is still loading it,

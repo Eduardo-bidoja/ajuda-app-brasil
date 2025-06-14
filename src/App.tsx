@@ -8,6 +8,7 @@ import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
 import AuthPage from "./pages/Auth";
 import CreateCompanyPage from "./pages/CreateCompany";
+import JoinCompanyPage from "./pages/JoinCompany";
 import Dashboard from "./pages/Dashboard";
 import EmployeeDashboard from "./pages/EmployeeDashboard";
 import { AuthProvider } from "./hooks/use-auth";
@@ -26,6 +27,7 @@ const App = () => (
             <Route path="/" element={<Index />} />
             <Route path="/auth" element={<AuthPage />} />
             <Route path="/create-company" element={<CreateCompanyPage />} />
+            <Route path="/join-company" element={<JoinCompanyPage />} />
             <Route path="/dashboard" element={<Dashboard />} />
             <Route path="/employee-dashboard" element={<EmployeeDashboard />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
