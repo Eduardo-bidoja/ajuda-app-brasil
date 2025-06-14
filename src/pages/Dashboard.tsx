@@ -1,4 +1,3 @@
-
 import { useAuth } from '@/hooks/use-auth';
 import { Button } from '@/components/ui/button';
 import { useNavigate } from 'react-router-dom';
@@ -6,6 +5,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useEffect, useState } from 'react';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Skeleton } from '@/components/ui/skeleton';
+import { AddEmployeeDialog } from '@/components/AddEmployeeDialog';
 
 // Manually defining Company type to fix build errors
 type Company = {
@@ -34,6 +34,7 @@ export default function Dashboard() {
   const [company, setCompany] = useState<Company | null>(null);
   const [employees, setEmployees] = useState<Profile[]>([]);
   const [loadingEmployees, setLoadingEmployees] = useState(true);
+  const [refreshKey, setRefreshKey] = useState(0);
 
   useEffect(() => {
     const fetchCompany = async () => {
@@ -81,7 +82,7 @@ export default function Dashboard() {
     if (profile) {
         fetchEmployees();
     }
-  }, [profile]);
+  }, [profile, refreshKey]);
 
   const handleSignOut = async () => {
     await signOut();
@@ -91,6 +92,10 @@ export default function Dashboard() {
   const formatCurrency = (value: number | null) => {
     if (value === null || typeof value === 'undefined') return '---';
     return value.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+  };
+
+  const handleEmployeeAdded = () => {
+    setRefreshKey(oldKey => oldKey + 1);
   };
 
   if (authLoading) {
@@ -110,17 +115,17 @@ export default function Dashboard() {
       {company ? (
         <div className="mt-4 p-6 border rounded-lg bg-card text-card-foreground">
           <h2 className="text-2xl font-semibold">{company.name}</h2>
-          <p className="text-muted-foreground mt-2">Share this unique code with your employees to let them join:</p>
+          <p className="text-muted-foreground mt-2">Compartilhe este código com seus funcionários para que eles possam entrar:</p>
           <p className="text-2xl font-mono bg-muted text-muted-foreground p-3 rounded inline-block mt-2">{company.company_code}</p>
         </div>
       ) : (
-        <p>Nenhuma informação da empresa encontrada.</p>
+        <Skeleton className="h-32 w-full" />
       )}
 
       <div className="mt-8">
         <div className="flex justify-between items-center mb-4">
           <h3 className="text-xl font-semibold">Funcionários</h3>
-          <Button disabled>Adicionar Funcionário</Button>
+          {company && <AddEmployeeDialog companyId={company.id} onSuccess={handleEmployeeAdded} />}
         </div>
         <div className="border rounded-lg">
           <Table>
@@ -169,4 +174,3 @@ export default function Dashboard() {
     </div>
   );
 }
-
